@@ -90,6 +90,7 @@ class OpenTIMS:
         self.peaks_cnt = self.handle.no_peaks_total()
         self.all_columns = all_columns
         self.all_columns_dtypes = all_columns_dtype
+        self.frames_no = self.max_frame - self.min_frame + 1 
 
     @property
     def min_inv_ion_mobility(self) -> float:
@@ -131,15 +132,15 @@ class OpenTIMS:
 
     @property
     def min_frame(self) -> int:
-        return self.frames["Id"][0]
+        return self.frames["Id"].iloc[0]
 
     @property
     def max_frame(self) -> int:
-        return self.frames["Id"][-1]
+        return self.frames["Id"].iloc[-1]
 
-    @property
-    def frames_no(self) -> int:
-        return self.max_frame - self.min_frame + 1
+    # @property
+    # def frames_no(self) -> int:
+    #     return self.max_frame - self.min_frame + 1       
 
     @property
     def min_scan(self) -> int:
