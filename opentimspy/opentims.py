@@ -22,10 +22,11 @@ import numpy.typing as npt
 import pathlib
 import sqlite3
 import typing
+import pandas as pd
 
 import opentimspy
 
-from .sql import tables_names, table2dict, table2keyed_dict
+from .sql import tables_names, table2dict, table2keyed_dict, table2df
 from .dimension_translations import (
     cast_to_numpy_arrays,
     translate_values_frame_sorted,
@@ -107,12 +108,12 @@ class OpenTIMS:
         return float(self.GlobalMetadata["MzAcqRangeUpper"])
 
     @cached_property
-    def frames(self) -> dict[str, npt.NDArray]:
-        frames = self.table2dict("Frames")
+    def frames(self) -> pd.DataFrame:
+        frames = self.table2df("Frames").sort_values('Id')
         # make sure it is all sorted by retention time / frame number
-        sort_order = np.argsort(frames["Id"])
-        for column in frames:
-            frames[column] = frames[column][sort_order]
+        # sort_order = np.argsort(frames["Id"])
+        # for column in frames:
+        #     frames[column] = frames[column][sort_order]
         return frames
 
     @property
@@ -206,6 +207,16 @@ class OpenTIMS:
 
     def table2dict(self, name: str):
         return table2dict(self.analysis_directory / "analysis.tdf", name)
+    
+    def table2df(self, name: str):
+        """Retrieve a table with SQLite connection from a data base.
+
+        Args:
+            name (str): Name of the table to extract.
+        Returns:
+            pd.DataFrame: required data frame.
+        """
+        return table2df(self.analysis_directory/'analysis.tdf', name)
 
     def table2keyed_dict(self, name: str):
         with self.get_sql_connection() as sqlcon:

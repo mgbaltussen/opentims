@@ -2,6 +2,12 @@ import numpy as np
 import sqlite3
 from collections import namedtuple
 
+import pandas as pd
+
+def _sql2df(path, query):
+    with sqlite3.connect(path) as conn:
+        return pd.read_sql_query(query, conn)
+
 def _sql2list(path, query):
     with sqlite3.connect(path) as conn:
         c = conn.cursor()
@@ -61,3 +67,16 @@ def table2keyed_dict(connection, tblname):
         nt = tuple_type(*row)
         ret[nt[sql_key_idx]] = nt
     return ret
+
+def table2df(path, name):
+    """Retrieve a table with SQLite connection from a data base.
+
+    This function is simply great for injection attacks (:
+    Don't do that.
+
+    Args:
+        name (str): Name of the table to extract.
+    Returns:
+        pd.DataFrame: required data frame.
+    """
+    return _sql2df(path, f"SELECT * FROM {name}")
